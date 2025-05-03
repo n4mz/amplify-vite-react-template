@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../amplify/data/resource";
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useEffect, useState } from 'react';
+import { generateClient } from "aws-amplify/data";
 
-// Initialize the client
 const client = generateClient<Schema>();
 
 function App() {
@@ -11,39 +11,25 @@ function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
   useEffect(() => {
-    const subscription = client.models.Todo.observeQuery().subscribe({
+    client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
     });
-
-    // Cleanup the subscription on component unmount
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
-  function createTodo() {
+    function createTodo() {
     const content = window.prompt("Todo content");
     if (content) {
-      client.models.Todo.create({ content }).then(() => {
-        // Optionally refetch or add the new todo to the state
-        setTodos((prevTodos) => [
-          ...prevTodos,
-          { id: String(prevTodos.length + 1), content }, // Dummy id for illustration
-        ]);
-      });
+      client.models.Todo.create({ content });
     }
   }
 
   function deleteTodo(id: string) {
-    client.models.Todo.delete({ id }).then(() => {
-      // Update the state to remove the deleted todo
-      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-    });
+    client.models.Todo.delete({ id });
   }
 
   return (
-    <main>
       <button onClick={signOut}>Sign out</button>
+    <main>
       <h1>My todos</h1>
       <button onClick={createTodo}>+ new</button>
       <ul>
@@ -63,5 +49,4 @@ function App() {
     </main>
   );
 }
-
 export default App;
